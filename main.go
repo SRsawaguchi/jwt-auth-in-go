@@ -14,7 +14,6 @@ func main() {
 	if err := server.Init(context.Background()); err != nil {
 		log.Fatalf(err.Error())
 	}
-	defer server.Close(context.Background())
 
 	log.Printf("The server starting at http://localhost:%s/", port)
 	log.Fatal(http.ListenAndServe(":"+port, server.Handler()))
