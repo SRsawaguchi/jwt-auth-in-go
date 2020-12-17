@@ -1,7 +1,21 @@
 package main
 
-import "fmt"
+import (
+	"context"
+	"log"
+	"net/http"
+
+	"github.com/SRsawaguchi/simple-jwt-auth-in-go/internal/server"
+)
 
 func main() {
-	fmt.Println("Hello")
+	port := "8080"
+	server := server.Server{}
+	if err := server.Init(context.Background()); err != nil {
+		log.Fatalf(err.Error())
+	}
+	defer server.Close(context.Background())
+
+	log.Printf("The server starting at http://localhost:%s/", port)
+	log.Fatal(http.ListenAndServe(":"+port, server.Handler()))
 }
