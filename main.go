@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/SRsawaguchi/simple-jwt-auth-in-go/internal/server"
+	"github.com/SRsawaguchi/jwt-auth-in-go/internal/server"
 )
 
 func main() {

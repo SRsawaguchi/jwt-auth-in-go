@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/SRsawaguchi/simple-jwt-auth-in-go/internal/auth"
-	"github.com/SRsawaguchi/simple-jwt-auth-in-go/internal/model"
+	"github.com/SRsawaguchi/jwt-auth-in-go/internal/auth"
+	"github.com/SRsawaguchi/jwt-auth-in-go/internal/model"
 )
 
 var (

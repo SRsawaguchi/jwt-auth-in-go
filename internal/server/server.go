@@ -4,8 +4,8 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/SRsawaguchi/simple-jwt-auth-in-go/internal/endpoint"
-	"github.com/SRsawaguchi/simple-jwt-auth-in-go/internal/model"
+	"github.com/SRsawaguchi/jwt-auth-in-go/internal/endpoint"
+	"github.com/SRsawaguchi/jwt-auth-in-go/internal/model"
 	"github.com/go-chi/chi"
 )
 

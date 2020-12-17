@@ -1,4 +1,4 @@
-module github.com/SRsawaguchi/simple-jwt-auth-in-go
+module github.com/SRsawaguchi/jwt-auth-in-go
 
 go 1.14
 
