@@ -161,3 +161,16 @@ func testLogin(t *testing.T, tc *loginTestCase) {
 		t.Error("Invalid name in token.")
 	}
 }
+func TestHello(t *testing.T) {
+	name := "Kade"
+	password := "ntRBMHISTKwltVs"
+	_, err := signinForTest(name, password)
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	t.Run("Logged in", func(t *testing.T) {
+
+	})
+	t.Run("Not logged in", func(t *testing.T) {})
+}

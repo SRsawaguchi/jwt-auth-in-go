@@ -64,7 +64,8 @@ func (e *Endpoint) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// JWTトークンを作成
-	token, err := auth.GenerateToken(user.Name, SecretKey, time.Second*24)
+	expiresAt := time.Now().Add(time.Hour * 24).Unix()
+	token, err := auth.GenerateToken(user.Name, SecretKey, expiresAt)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, err.Error())
@@ -113,7 +114,8 @@ func (e *Endpoint) Signin(w http.ResponseWriter, r *http.Request) {
 	e.Users[user.Name] = user
 
 	// JWTトークンを作成(有効期限は1日。ただし、いろいろと変えて試してみて。)
-	token, err := auth.GenerateToken(user.Name, SecretKey, time.Hour*24)
+	expiresAt := time.Now().Add(time.Hour * 24).Unix()
+	token, err := auth.GenerateToken(user.Name, SecretKey, expiresAt)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, err.Error())

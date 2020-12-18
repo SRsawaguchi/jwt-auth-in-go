@@ -1,8 +1,6 @@
 package auth
 
 import (
-	"time"
-
 	"github.com/dgrijalva/jwt-go"
 )
 
@@ -13,11 +11,11 @@ type NamedClaims struct {
 }
 
 // GenerateToken generates JWT token with passed secretV
-func GenerateToken(username, secret string, expireDuration time.Duration) (string, error) {
+func GenerateToken(username, secret string, expiresAt int64) (string, error) {
 	claim := NamedClaims{
 		Name: username,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(expireDuration).Unix(),
+			ExpiresAt: expiresAt,
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)

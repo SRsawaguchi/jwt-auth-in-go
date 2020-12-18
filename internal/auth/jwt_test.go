@@ -12,9 +12,10 @@ import (
 func TestGenerateToken(t *testing.T) {
 	username := "Zola Russel"
 	secret := "9FdZ&T*x4gu9"
-	expireDuration := time.Hour * 24
+	duration := time.Hour * 24
+	expiresAt := time.Now().Add(duration).Unix()
 
-	jwtString, err := GenerateToken(username, secret, expireDuration)
+	jwtString, err := GenerateToken(username, secret, expiresAt)
 	if err != nil {
 		t.Errorf(err.Error())
 	}
@@ -30,9 +31,8 @@ func TestGenerateToken(t *testing.T) {
 		t.Errorf("Invalid name: expected '%v' but got '%v'", username, claim.Name)
 	}
 
-	expectedExpires := time.Now().Add(expireDuration).Unix()
-	if math.Abs(float64(claim.ExpiresAt-expectedExpires)) != 0 {
-		t.Errorf("Invalid ExpiresAt: expected '%v' but got '%v' (%v)", expectedExpires, claim.ExpiresAt, expectedExpires-claim.ExpiresAt)
+	if math.Abs(float64(claim.ExpiresAt-expiresAt)) != 0 {
+		t.Errorf("Invalid ExpiresAt: expected '%v' but got '%v' (%v)", expiresAt, claim.ExpiresAt, expiresAt-claim.ExpiresAt)
 	}
 }
 
