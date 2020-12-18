@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/SRsawaguchi/jwt-auth-in-go/internal/auth"
 	"github.com/SRsawaguchi/jwt-auth-in-go/internal/model"
@@ -43,6 +44,10 @@ func signinForTest(name, password string) (*model.User, error) {
 	return user, nil
 }
 
+func loginForTest(name string, expiresAt int64) (string, error) {
+	return auth.GenerateToken(name, SecretKey, expiresAt)
+}
+
 func TestSignin(t *testing.T) {
 	data := `{ "name": "Kade", "password": "qwerty" }`
 	writer := httptest.NewRecorder()
@@ -55,8 +60,8 @@ func TestSignin(t *testing.T) {
 	}
 
 	user, ok := endpoint.Users["Kade"]
-	if ok {
-		t.Error("Could not save user: 'Kade'")
+	if !ok {
+		t.Errorf("Could not save user: 'Kade'")
 	}
 
 	resp := &SigninResponse{}
@@ -104,19 +109,19 @@ func TestLogin(t *testing.T) {
 			{
 				Title:      "Invalid name",
 				Req:        LoginRequest{Name: "invalid", Password: password},
-				StatusCode: http.StatusUnauthorized,
+				StatusCode: http.StatusBadRequest,
 				IsError:    true,
 			},
 			{
 				Title:      "Invalid password",
 				Req:        LoginRequest{Name: name, Password: "Invalid"},
-				StatusCode: http.StatusUnauthorized,
+				StatusCode: http.StatusBadRequest,
 				IsError:    true,
 			},
 			{
 				Title:      "Empty data",
 				Req:        LoginRequest{Name: "", Password: ""},
-				StatusCode: http.StatusUnauthorized,
+				StatusCode: http.StatusBadRequest,
 				IsError:    true,
 			},
 		}
@@ -161,6 +166,15 @@ func testLogin(t *testing.T, tc *loginTestCase) {
 		t.Error("Invalid name in token.")
 	}
 }
+
+type helloTestCase struct {
+	Title      string
+	Token      string
+	Message    string
+	StatusCode int
+	IsError    bool
+}
+
 func TestHello(t *testing.T) {
 	name := "Kade"
 	password := "ntRBMHISTKwltVs"
@@ -170,7 +184,72 @@ func TestHello(t *testing.T) {
 	}
 
 	t.Run("Logged in", func(t *testing.T) {
+		expiresAt := time.Now().Add(time.Hour * 24).Unix()
+		token, err := loginForTest(name, expiresAt)
+		if err != nil {
+			t.Error(err.Error())
+		}
 
+		testHello(t, &helloTestCase{
+			Title:      "It should get greeting message",
+			Token:      token,
+			StatusCode: http.StatusOK,
+			Message:    "Hello, " + name,
+			IsError:    false,
+		})
 	})
-	t.Run("Not logged in", func(t *testing.T) {})
+	t.Run("Not logged in", func(t *testing.T) {
+		expiresAt := time.Now().Unix() - 100
+		expiredToken, err := loginForTest(name, expiresAt)
+		if err != nil {
+			t.Error(err.Error())
+		}
+
+		testCases := []helloTestCase{
+			{
+				Title:      "Not logged in",
+				Token:      "",
+				StatusCode: http.StatusUnauthorized,
+				IsError:    true,
+			},
+			{
+				Title:      "Token expired",
+				Token:      expiredToken,
+				StatusCode: http.StatusUnauthorized,
+				IsError:    true,
+			},
+		}
+		for _, tc := range testCases {
+			testHello(t, &tc)
+		}
+	})
+}
+
+func testHello(t *testing.T, tc *helloTestCase) {
+	t.Helper()
+
+	writer := httptest.NewRecorder()
+	request, _ := http.NewRequest("GET", "/hello", nil)
+	if tc.Token != "" {
+		request.Header.Set("Token", tc.Token)
+	}
+	mux.ServeHTTP(writer, request)
+
+	if writer.Code != tc.StatusCode {
+		t.Errorf("Response code is not %v but %v.", tc.StatusCode, writer.Code)
+	}
+
+	if tc.IsError {
+		return
+	}
+
+	resp := &HelloResponse{}
+	err := json.NewDecoder(writer.Body).Decode(resp)
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	if resp.Message != tc.Message {
+		t.Errorf("Expected message is '%v' but got '%v'", tc.Message, resp.Message)
+	}
 }
