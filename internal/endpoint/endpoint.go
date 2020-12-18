@@ -20,6 +20,13 @@ type Endpoint struct {
 	Users map[string]*model.User
 }
 
+// NewEndpoint creates new Endpoint object
+func NewEndpoint() *Endpoint {
+	return &Endpoint{
+		Users: map[string]*model.User{},
+	}
+}
+
 // LoginRequest represents request of login
 type LoginRequest struct {
 	Name     string `json:"name"`
